@@ -1,0 +1,30 @@
+[package]
+authors = ["Robin Jadoul <robin.jadoul@gmail.com>"]
+name = "pm1"
+description = "Pollard's p - 1 factoring"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+autocxx = "0.26.0"
+clap = { version = "4.4.4", features = ["derive"] }
+cxx = "1.0.107"
+pyo3 = { version = "0.19.2", features = ["extension-module"], optional = true }
+rug = "1.22.0"
+tqdm = "0.5.2"
+
+[build-dependencies]
+autocxx-build = "0.26.0"
+
+[[bin]]
+name = "pm1"
+path = "src/bin/pm1.rs"
+
+[lib]
+name = "pm1"
+crate-type = ["lib", "cdylib"]
+
+[features]
+default = ["pyo3"]
