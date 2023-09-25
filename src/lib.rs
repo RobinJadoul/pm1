@@ -178,6 +178,22 @@ mod pymod {
         Ok(pm1_factorbase_with_verbosity(fb1, exp, &n.0, base.0, verbosity).to_object(py))
     }
 
+    #[pyfunction]
+    #[pyo3(name = "pm1_custom_primes")]
+    fn pypm1_custom_primes<'py>(
+        py: Python<'py>,
+        factorbase: &mut Primes,
+        exp: u64,
+        n: Int,
+        base: Int,
+        verbosity: Verbosity,
+    ) -> PyResult<Py<PyAny>> {
+        Ok(
+            pm1_factorbase_with_verbosity(factorbase.clone(), exp, &n.0, base.0, verbosity)
+                .to_object(py),
+        )
+    }
+
     #[pymodule]
     #[pyo3(name = "pm1")]
     fn pm1_module(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
@@ -187,6 +203,7 @@ mod pymod {
         m.add_function(wrap_pyfunction!(pypm1, m)?)?;
         m.add_function(wrap_pyfunction!(pypm1base, m)?)?;
         m.add_function(wrap_pyfunction!(pypm1_factorbase, m)?)?;
+        m.add_function(wrap_pyfunction!(pypm1_custom_primes, m)?)?;
         Ok(())
     }
 }

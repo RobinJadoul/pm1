@@ -20,6 +20,18 @@ impl Primes {
             stop: high,
         }
     }
+
+    fn curlow(&mut self) -> u64 {
+        unsafe {
+            let start = self.sieve.pin_mut().next_prime();
+            self.sieve.pin_mut().prev_prime(); // Rewind
+            start
+        }
+    }
+
+    pub(crate) fn clone(&mut self) -> Self {
+        Self::new(self.curlow(), self.stop)
+    }
 }
 
 #[cfg(feature = "pyo3")]
@@ -39,12 +51,7 @@ impl Primes {
     }
 
     fn __repr__(mut s: PyRefMut<'_, Self>) -> String {
-        let start;
-        unsafe {
-            start = s.sieve.pin_mut().next_prime();
-            s.sieve.pin_mut().prev_prime(); // Rewind
-        }
-        format!("Primes({}, {})", start, s.stop)
+        format!("Primes({}, {})", s.curlow(), s.stop)
     }
 }
 
