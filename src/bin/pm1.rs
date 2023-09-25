@@ -1,5 +1,5 @@
 use clap::Parser;
-use pm1::{pm1, Verbosity};
+use pm1::{pm1base, Verbosity};
 use rug::Integer as Int;
 
 #[derive(Parser, Debug)]
@@ -13,6 +13,8 @@ struct Args {
     logb2: Option<u64>,
     #[arg(short)]
     n: String,
+    #[arg(long, default_value_t = 2)]
+    base: i64,
     #[arg(short)]
     verbose: bool,
 }
@@ -27,11 +29,12 @@ fn main() {
     };
     println!(
         "{:?}",
-        pm1(
+        pm1base(
             args.logb1,
             args.exp,
             logb2,
             &Int::from_str_radix(&args.n, 10).unwrap(),
+            Int::from(args.base),
             verbosity
         )
     );
