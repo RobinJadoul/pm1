@@ -16,7 +16,12 @@ pub enum Verbosity {
     Tqdm,
 }
 
-pub fn mainloop<Item, Iter>(factorbase: Iter, exp: u64, n: &RugInt, mut base: RugInt) -> Pm1Result
+pub fn pm1_factorbase<Item, Iter>(
+    factorbase: Iter,
+    exp: u64,
+    n: &RugInt,
+    mut base: RugInt,
+) -> Pm1Result
 where
     Item: Into<RugInt>,
     Iter: Iterator<Item = Item>,
@@ -37,7 +42,7 @@ where
     Pm1Result::Incomplete(base)
 }
 
-pub fn mainloop_with_verbosity<Item, Iter>(
+pub fn pm1_factorbase_with_verbosity<Item, Iter>(
     factorbase: Iter,
     exp: u64,
     n: &RugInt,
@@ -49,8 +54,8 @@ where
     Iter: Iterator<Item = Item>,
 {
     match verbosity {
-        Verbosity::Silent => mainloop(factorbase, exp, n, base),
-        Verbosity::Tqdm => mainloop(tqdm::tqdm(factorbase), exp, n, base),
+        Verbosity::Silent => pm1_factorbase(factorbase, exp, n, base),
+        Verbosity::Tqdm => pm1_factorbase(tqdm::tqdm(factorbase), exp, n, base),
     }
 }
 
@@ -68,7 +73,7 @@ pub fn pm1base(
 ) -> Option<RugInt> {
     let it1 = Primes::new(2, 1 << logb1);
     let it2 = Primes::new(1 << logb1, 1 << logb2);
-    base = match mainloop_with_verbosity(it1, exp, n, base, verbosity) {
+    base = match pm1_factorbase_with_verbosity(it1, exp, n, base, verbosity) {
         Pm1Result::Fail => {
             return None;
         }
@@ -77,7 +82,7 @@ pub fn pm1base(
             return Some(r);
         }
     };
-    match mainloop_with_verbosity(it2, 1, n, base, verbosity) {
+    match pm1_factorbase_with_verbosity(it2, 1, n, base, verbosity) {
         Pm1Result::Fail => None,
         Pm1Result::Incomplete(_) => None,
         Pm1Result::Complete(r) => Some(r),
@@ -155,7 +160,7 @@ mod pymod {
     }
 
     #[pyfunction]
-    fn pm1_factorbase<'py>(
+    fn pypm1_factorbase<'py>(
         py: Python<'py>,
         factorbase: &'py PyAny,
         exp: u64,
@@ -170,7 +175,7 @@ mod pymod {
                 let x = x.expect("What is this iteration failure?");
                 x.extract::<Int>().expect("Neither int nor pm1.Int?").0
             });
-        Ok(mainloop_with_verbosity(fb1, exp, &n.0, base.0, verbosity).to_object(py))
+        Ok(pm1_factorbase_with_verbosity(fb1, exp, &n.0, base.0, verbosity).to_object(py))
     }
 
     #[pymodule]
@@ -181,7 +186,7 @@ mod pymod {
         m.add_class::<PyPm1Result>()?;
         m.add_function(wrap_pyfunction!(pypm1, m)?)?;
         m.add_function(wrap_pyfunction!(pypm1base, m)?)?;
-        m.add_function(wrap_pyfunction!(pm1_factorbase, m)?)?;
+        m.add_function(wrap_pyfunction!(pypm1_factorbase, m)?)?;
         Ok(())
     }
 }
